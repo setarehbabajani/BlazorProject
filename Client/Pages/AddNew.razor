@@ -1,0 +1,44 @@
+@page "/AddNewOne"
+@inject HttpClient Client
+@inject NavigationManager NavigationManager
+@inject NavigationManager MyNavigationManager
+
+<EditForm Model="@article" OnValidSubmit="@AddArticle">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <p><label> Category:</label>
+    <InputText @bind-Value="article.Category" /></p>
+
+    <p><label>Color:</label>
+    <InputText @bind-Value="article.Color" /></p>
+    
+    <p><label>Price:</label>
+    <InputNumber @bind-Value="article.Price" /></p>
+
+    <p><label>Count:</label>
+    <InputNumber @bind-Value="article.Count" /></p>
+
+    <button type="submit">Add</button>
+    <button type="submit" @onclick = "Go">Cancel</button>
+</EditForm>
+
+<style>
+body {background-color: #64ACCE;} 
+</style>
+
+
+@code {
+    private Articles article = new Articles();
+    private string error = "";
+    private void Go()
+    {
+        NavigationManager.NavigateTo("/HoleArticles");
+    }
+    public async Task AddArticle()
+    {
+        var URL = @"http://localhost:5001/api/Clothe/AddNewClotheToDB";
+        await Client.PostAsJsonAsync<Articles>(URL , article);
+        NavigationManager.NavigateTo("/HoleArticles");
+    }
+
+    }

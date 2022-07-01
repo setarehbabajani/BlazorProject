@@ -1,0 +1,70 @@
+@page "/Form"
+@inject HttpClient Client
+@inject NavigationManager NavigationManager
+
+<EditForm Model="@person" OnValidSubmit="AddData">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <p><label>First Name:</label>
+    <InputText @bind-Value="person.FirstName" /></p>
+
+    <p><label>Last Name:</label>
+    <InputText @bind-Value="person.LastName" /></p>
+
+    <p><label for ="email">Email:</label>
+    <InputText @bind-Value="person.Email" /></p>
+    
+    <p><label>CardNumber:</label>
+    <InputNumber @bind-Value="person.CardNum" /></p>
+
+    <p><label>Are you satisfied?</label>
+    <InputCheckbox @bind-Value="person.IsGood" />
+    </p>
+
+    <button type="submit" @onclick = "GoP">Pay</button>
+    <button type="submit" @onclick = "Go">First Page</button>
+</EditForm>
+
+@* <style >
+    body {
+    background-image: url('Image/bg4.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    }
+</style> *@
+<style>
+body {background-color: #64ACCE;} 
+</style>
+
+
+<p>
+    @foreach (var item in @allrates)
+    {
+        <p>@item.FirstName :@item.LastName : @item.Email (@item.Date)</p>
+    }
+</p>
+
+
+
+@code {
+    private ProfKarbar person = new ProfKarbar();
+    private List<ProfKarbar> allrates = new List<ProfKarbar>();
+    private string error = "";
+    public void AddData(){
+        person.Date = DateTime.Now;
+        allrates.Add(person);
+        person = new ProfKarbar();
+    }
+    private void Go()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    public void GoP()
+    {
+        if(person.LastName != null & person.FirstName !=null & person.Email !=null & person.CardNum !=0)
+            NavigationManager.NavigateTo("/LastePage");
+    }
+
+    }

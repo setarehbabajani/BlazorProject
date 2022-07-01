@@ -1,0 +1,126 @@
+@page "/HoleArticles"
+
+@inject NavigationManager navi
+@inject HttpClient Client
+@inject IJSRuntime js
+
+@* <style >
+    body {
+    background-image: url('Image/bg4.png');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    }
+</style> *@
+<style>
+body {background-color: #30BDCB;} 
+</style>
+
+<table class="table table-bordered" >
+    <thead>
+        <tr>
+            <th>Number of clothes you chosed</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody> 
+        <tr>
+            <td>@number</td>
+            <td>@price</td>
+            <td><button class="btn btn-primary"@onclick="Finish">Finish The Buy</button></td>
+        </tr>
+    </tbody>  
+</table> 
+
+<table class="table table-bordered" >
+    <thead>
+        <tr>
+            <th>Catagory</th>
+            <th>Number</th>
+            <th>Color</th>
+            <th>Price</th>
+            <th>Add to chart</th>
+            <th>Delete</th>
+            <th>Update</th>
+        </tr>
+    </thead>
+    @if(Clothes != null)
+    {
+        @foreach (var item in Clothes)
+        {
+            <tbody>
+            <tr>
+                <td>@item.Category</td>
+                <td>@item.Count</td>
+                <td>@item.Color</td>
+                <td>@item.Price</td>
+                <td><button class="btn btn-primary" @onclick="(()=>append(item))">Add</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => DeleteArticle(item.Id))">Delete</button></td>
+                <td><button class="btn btn-primary" @onclick="(()=>UpdateArticle(item))">Update the Number</button></td>
+            </tr>
+        </tbody> 
+        }
+    }
+</table> 
+<button class="btn btn-primary"@onclick="GoAdd">Add New</button>
+<button class="btn btn-primary"@onclick="GoAdd2">First Page</button>
+@code
+{
+    public int number =0;
+    public int price=0;
+    List<Articles> Clothes {get; set;} 
+    private Articles article = new Articles();
+    public Articles array1=new Articles(){Category="Pants",Count = 2,Color="blue", Price=129000};
+    public Articles array2=new Articles(){Category="T_Shirts",Count = 0,Color="black", Price=189000};
+    public void append(Articles x)
+    {
+        if(x.Count > 0)
+        {
+            ShopList.ShList.Add(x);
+            number++;
+            x.Count--;
+            price += x.Price;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var URL = @"http://localhost:5001/api/Clothe/getAllClothes";
+        Clothes = await Client.GetFromJsonAsync<List<Articles>>(URL);
+    }
+    private void GoAdd()
+    {
+        navi.NavigateTo("/AddNewOne");
+    }
+    private void GoAdd2()
+    {
+        navi.NavigateTo("/");
+    }
+    private void Finish()
+    {
+        navi.NavigateTo("/Form");
+    }
+
+    public async Task DeleteArticle(int clotheid)
+    {
+        var a = Clothes.First(x => x.Id == clotheid);
+        if (await js.InvokeAsync<bool>("confirm", $"Do you want to delete {a.Category} with {a.Color} Color?"))
+        {
+            await Client.DeleteAsync($"http://localhost:5001/api/Clothe/{clotheid}");
+            await OnInitializedAsync();
+        }
+    }
+
+    public Articles NewArticle(Articles a)
+    {
+        a.Count++;
+        return a;
+    }
+
+    public async Task UpdateArticle(Articles article)
+    {
+        var URL = @"http://localhost:5001/api/Clothe/UpdateArticle";
+        await Client.PutAsJsonAsync<Articles>(URL,NewArticle(article));
+    }
+
+} 
